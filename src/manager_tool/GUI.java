@@ -1,20 +1,21 @@
-package Project_manager;
+package manager_tool;
 import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GUI extends JFrame {
+public class GUI extends JFrame implements Serializable {
     private List<Task> tasks;
     private DefaultListModel<String> taskListModel;
     private JList<String> taskList;
     private JTextField taskInput;
 
     public GUI() {
-        super("To-Do List");
+        super("Project Management Tool");
 
         tasks = new ArrayList<>();
         taskListModel = new DefaultListModel<>();
@@ -51,12 +52,12 @@ public class GUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 int selectedIndex = taskList.getSelectedIndex();
                 if (selectedIndex != -1) {
-                    deleteTask(selectedIndex); // Using the synchronized method to delete task
+                    deleteTask(selectedIndex);
                 }
             }
         });
 
-        setSize(400, 300);
+        setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);

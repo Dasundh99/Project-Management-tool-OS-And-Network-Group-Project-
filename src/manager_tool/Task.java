@@ -1,11 +1,11 @@
-package Project_manager;
+package manager_tool;
 public class Task {
     private String description;
     private boolean completed;
 
     public Task(String description) {
         this.description = description;
-        this.completed = false; // By default, tasks are not completed
+        this.completed = false;
     }
 
     public String getDescription() {
