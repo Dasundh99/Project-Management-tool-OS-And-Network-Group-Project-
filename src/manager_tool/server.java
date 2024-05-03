@@ -24,7 +24,12 @@ public class server {
     }
 
     public synchronized void broadcastTask(Task task) {
-        for (ClientHandler client : clients) {
+        for (Iterator<ClientHandler> iterator = clients.iterator(); iterator.hasNext();) {
+            ClientHandler client = iterator.next();
+            if (!client.isAlive()) {
+                iterator.remove();
+                continue;
+            }
             client.sendTask(task);
         }
     }
@@ -46,12 +51,18 @@ public class server {
         public void run() {
             try {
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-                while (true) {
+                while (socket.isConnected()) {
                     Task task = (Task) inputStream.readObject();
                     broadcastTask(task);
                 }
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                System.out.println("Client disconnected: " + socket);
+                clients.remove(this);
+                try {
+                    socket.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
