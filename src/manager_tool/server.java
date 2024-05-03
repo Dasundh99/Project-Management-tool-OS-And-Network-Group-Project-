@@ -2,106 +2,70 @@ package manager_tool;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class server {
-    private List<Task> tasks;
+    private static final int PORT = 5000;
+    private List<ClientHandler> clients = new ArrayList<>();
 
     public server() {
-        tasks = new ArrayList<>();
-    }
-
-    public synchronized void addTask(Task task) {
-        tasks.add(task);
-    }
-
-    public synchronized void deleteTask(int index) {
-        if (index >= 0 && index < tasks.size()) {
-            tasks.remove(index);
-        }
-    }
-
-    public synchronized List<Task> getTasks() {
-        return new ArrayList<>(tasks);
-    }
-
-    public static void main(String[] args) {
-        server server = new server();
-        try (ServerSocket serverSocket = new ServerSocket(5000)) {
-            System.out.println("Server started on port 5000");
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Server is running...");
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("New client connected: " + clientSocket.getInetAddress());
-                ClientHandler clientHandler = new ClientHandler(clientSocket, server);
-                new Thread(clientHandler).start();
+                System.out.println("New client connected: " + clientSocket);
+                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                clients.add(clientHandler);
+                clientHandler.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static class ClientHandler implements Runnable {
-        private Socket clientSocket;
-        private server server;
-        private ObjectInputStream inputStream;
+    public synchronized void broadcastTask(Task task) {
+        for (ClientHandler client : clients) {
+            client.sendTask(task);
+        }
+    }
+
+    private class ClientHandler extends Thread {
+        private Socket socket;
         private ObjectOutputStream outputStream;
 
-        public ClientHandler(Socket clientSocket, server server) {
-            this.clientSocket = clientSocket;
-            this.server = server;
+        public ClientHandler(Socket socket) {
+            this.socket = socket;
             try {
-                outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-                inputStream = new ObjectInputStream(clientSocket.getInputStream());
+                outputStream = new ObjectOutputStream(socket.getOutputStream());
             } catch (IOException e) {
-                handleConnectionError(e);
-            }
-        }
-
-        private void handleConnectionError(Exception e) {
-            e.printStackTrace();
-            // Handle connection error here
-            close();
-        }
-
-        private void close() {
-            try {
-                if (inputStream != null)
-                    inputStream.close();
-                if (outputStream != null)
-                    outputStream.close();
-                if (clientSocket != null)
-                    clientSocket.close();
-            } catch (IOException e) {
-                // Ignore any errors while closing resources
+                e.printStackTrace();
             }
         }
 
         @Override
         public void run() {
             try {
+                ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
                 while (true) {
-                    String command = (String) inputStream.readObject();
-                    switch (command) {
-                        case "ADD":
-                            Task task = (Task) inputStream.readObject();
-                            server.addTask(task);
-                            break;
-                        case "DELETE":
-                            int deleteIndex = inputStream.readInt();
-                            server.deleteTask(deleteIndex);
-                            break;
-                        case "VIEW":
-                            List<Task> tasks = server.getTasks();
-                            outputStream.writeObject(tasks);
-                            break;
-                    }
+                    Task task = (Task) inputStream.readObject();
+                    broadcastTask(task);
                 }
             } catch (IOException | ClassNotFoundException e) {
-                handleConnectionError(e);
-            } finally {
-                close();
+                e.printStackTrace();
             }
         }
+
+        public void sendTask(Task task) {
+            try {
+                outputStream.writeObject(task);
+                outputStream.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new server();
     }
 }
