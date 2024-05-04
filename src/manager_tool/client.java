@@ -19,7 +19,7 @@ public class Client extends JFrame {
 
         taskInput = new JTextField(20);
         JButton addButton = new JButton("Add Task");
-        JButton editButton = new JButton("Mark as Completed");
+        JButton completedButton = new JButton("Mark as Completed");
         taskListModel = new DefaultListModel<>();
         taskList = new JList<>(taskListModel);
 
@@ -27,7 +27,7 @@ public class Client extends JFrame {
         Font boldFont = new Font(Font.SANS_SERIF, Font.BOLD, 14);
         taskInput.setFont(boldFont);
         addButton.setFont(boldFont);
-        editButton.setFont(boldFont);
+        completedButton.setFont(boldFont);
         taskList.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 
         JPanel inputPanel = new JPanel();
@@ -40,8 +40,8 @@ public class Client extends JFrame {
         // Apply color to inputPanel
         inputPanel.setBackground(new Color(240, 240, 240)); // Light gray background
 
-        // Add editButton to inputPanel
-        inputPanel.add(editButton);
+        // Add completedButton to inputPanel
+        inputPanel.add(completedButton);
 
         setLayout(new BorderLayout());
         add(inputPanel, BorderLayout.NORTH);
@@ -60,7 +60,7 @@ public class Client extends JFrame {
         });
 
         // Action listener for the editButton
-        editButton.addActionListener(new ActionListener() {
+        completedButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedIndex = taskList.getSelectedIndex();
@@ -79,7 +79,7 @@ public class Client extends JFrame {
                     if (selectedTask.isCompleted()) {
                         updatedTaskDescription = "[Completed] " + selectedTask.getDescription();
                     } else {
-                        updatedTaskDescription = "[Not Complete] " + selectedTask.getDescription();
+                        updatedTaskDescription = "[Incomplete] " + selectedTask.getDescription();
                     }
 
                     // Update the list with the updated task description
@@ -151,8 +151,8 @@ public class Client extends JFrame {
                 } else {
                     taskDescription = task.getDescription();
                     // Check if the task description already has the completion status prefix
-                    if (!taskDescription.startsWith("[Not Complete] ")) {
-                        taskDescription = "[Not Complete] " + taskDescription;
+                    if (!taskDescription.startsWith("[Incomplete] ")) {
+                        taskDescription = "[Incomplete] " + taskDescription;
                     }
                 }
                 // Add the formatted task description to the list if it's not already present
@@ -161,7 +161,7 @@ public class Client extends JFrame {
                 }
                 // Check if both completed and not completed tasks are present
                 String completedTaskDescription = "[Completed] " + task.getDescription();
-                String notCompletedTaskDescription = "[Not Complete] " + task.getDescription();
+                String notCompletedTaskDescription = "[Incomplete] " + task.getDescription();
                 if (taskListModel.contains(completedTaskDescription) && taskListModel.contains(notCompletedTaskDescription)) {
                     // If both are present, remove the not completed task
                     taskListModel.removeElement(notCompletedTaskDescription);
