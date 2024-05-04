@@ -30,22 +30,44 @@ public class Client extends JFrame {
         completedButton.setFont(boldFont);
         taskList.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 
-        JPanel inputPanel = new JPanel();
+        // Create a custom cell renderer to set font color based on task completion
+        taskList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                String text = (String) value;
+                if (text.startsWith("[Completed]")) {
+                    c.setForeground(Color.BLUE); // Set green color for completed tasks
+                } else {
+                    c.setForeground(Color.RED); // Set red color for incomplete tasks
+                }
+                c.setFont(c.getFont().deriveFont(Font.BOLD)); // Make the font bold
+                return c;
+            }
+        });
+
+        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         inputPanel.add(taskInput);
         inputPanel.add(addButton);
+        inputPanel.add(completedButton);
 
         JScrollPane scrollPane = new JScrollPane(taskList);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder()); // Remove border around JScrollPane
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // Apply color to inputPanel
-        inputPanel.setBackground(new Color(240, 240, 240)); // Light gray background
+        inputPanel.setBackground(new Color(240, 240, 240));
+        scrollPane.getViewport().setBackground(Color.WHITE);
 
-        // Add completedButton to inputPanel
-        inputPanel.add(completedButton);
+        addButton.setMargin(new Insets(5, 10, 5, 10));
+        completedButton.setMargin(new Insets(5, 10, 5, 10));
 
         setLayout(new BorderLayout());
         add(inputPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+
+        inputPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createEmptyBorder(10, 10, 10, 10),
+            BorderFactory.createLineBorder(Color.WHITE, 5)
+        ));
 
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -59,33 +81,22 @@ public class Client extends JFrame {
             }
         });
 
-        // Action listener for the editButton
         completedButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedIndex = taskList.getSelectedIndex();
                 if (selectedIndex != -1) {
                     String taskDescription = taskListModel.getElementAt(selectedIndex);
-                    // Remove the "[Completed] " or "[Not Complete] " prefix
                     taskDescription = taskDescription.substring(taskDescription.indexOf(" ") + 1);
-
-                    // Get the original task object from the taskDescription
                     Task selectedTask = new Task(taskDescription);
-                    // Toggle the completion status
                     selectedTask.setCompleted(!selectedTask.isCompleted());
-
-                    // Update the task description
                     String updatedTaskDescription;
                     if (selectedTask.isCompleted()) {
                         updatedTaskDescription = "[Completed] " + selectedTask.getDescription();
                     } else {
                         updatedTaskDescription = "[Incomplete] " + selectedTask.getDescription();
                     }
-
-                    // Update the list with the updated task description
                     taskListModel.setElementAt(updatedTaskDescription, selectedIndex);
-
-                    // Send the updated task to the server
                     sendTaskToServer(selectedTask);
                 } else {
                     JOptionPane.showMessageDialog(Client.this, "Please select a task to edit.", "No Task Selected", JOptionPane.WARNING_MESSAGE);
@@ -144,33 +155,26 @@ public class Client extends JFrame {
                 String taskDescription;
                 if (task.isCompleted()) {
                     taskDescription = task.getDescription();
-                    // Check if the task description already has the completion status prefix
                     if (!taskDescription.startsWith("[Completed] ")) {
                         taskDescription = "[Completed] " + taskDescription;
                     }
                 } else {
                     taskDescription = task.getDescription();
-                    // Check if the task description already has the completion status prefix
                     if (!taskDescription.startsWith("[Incomplete] ")) {
                         taskDescription = "[Incomplete] " + taskDescription;
                     }
                 }
-                // Add the formatted task description to the list if it's not already present
                 if (!taskListModel.contains(taskDescription)) {
                     taskListModel.addElement(taskDescription);
                 }
-                // Check if both completed and not completed tasks are present
                 String completedTaskDescription = "[Completed] " + task.getDescription();
                 String notCompletedTaskDescription = "[Incomplete] " + task.getDescription();
                 if (taskListModel.contains(completedTaskDescription) && taskListModel.contains(notCompletedTaskDescription)) {
-                    // If both are present, remove the not completed task
                     taskListModel.removeElement(notCompletedTaskDescription);
                 }
             }
         });
     }
-
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
