@@ -23,14 +23,14 @@ public class Client extends JFrame {
         taskListModel = new DefaultListModel<>();
         taskList = new JList<>(taskListModel);
 
-        // Apply visual enhancements
+        // Apply styles
         Font boldFont = new Font(Font.SANS_SERIF, Font.BOLD, 14);
         taskInput.setFont(boldFont);
         addButton.setFont(boldFont);
         completedButton.setFont(boldFont);
         taskList.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 
-        // Create a custom cell renderer to set font color based on task completion
+        // cell renderer
         taskList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -111,6 +111,10 @@ public class Client extends JFrame {
 
         connectToServer();
     }
+    
+    
+    
+    
 
     private void connectToServer() {
         try {
