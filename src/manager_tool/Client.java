@@ -188,4 +188,20 @@ public class Client extends JFrame {
             }
         });
     }
+    
+    private void addTask1(final Task task) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                String taskDescription = task.getDescription();
+                if (task.isCompleted()) {
+                    taskDescription = "[Completed] " + taskDescription;
+                } else {
+                    taskDescription = "[Incomplete] " + taskDescription;
+                }
+                taskListModel.addElement(taskDescription);
+            }
+        });
+    }
+
 }
