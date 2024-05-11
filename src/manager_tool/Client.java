@@ -37,7 +37,7 @@ public class Client extends JFrame {
                 Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 String text = (String) value;
                 if (text.startsWith("[Completed]")) {
-                    c.setForeground(Color.BLUE); // Set green color for completed tasks
+                    c.setForeground(Color.BLUE); // Set blue color for completed tasks
                 } else {
                     c.setForeground(Color.RED); // Set red color for incomplete tasks
                 }
@@ -112,10 +112,6 @@ public class Client extends JFrame {
         connectToServer();
     }
     
-    
-    
-    
-
     private void connectToServer() {
         try {
             Socket socket = new Socket(SERVER_IP, SERVER_PORT);
@@ -188,20 +184,4 @@ public class Client extends JFrame {
             }
         });
     }
-    
-    private void addTask1(final Task task) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                String taskDescription = task.getDescription();
-                if (task.isCompleted()) {
-                    taskDescription = "[Completed] " + taskDescription;
-                } else {
-                    taskDescription = "[Incomplete] " + taskDescription;
-                }
-                taskListModel.addElement(taskDescription);
-            }
-        });
-    }
-
 }

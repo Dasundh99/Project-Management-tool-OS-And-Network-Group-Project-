@@ -23,17 +23,6 @@ public class server {
         }
     }
 
-    public synchronized void broadcastTask(Task task) {
-        for (Iterator<ClientHandler> iterator = clients.iterator(); iterator.hasNext();) {
-            ClientHandler client = iterator.next();
-            if (!client.isAlive()) {
-                iterator.remove();
-                continue;
-            }
-            client.sendTask(task);
-        }
-    }
-
     private class ClientHandler extends Thread {
         private Socket socket;
         private ObjectOutputStream outputStream;
@@ -73,6 +62,17 @@ public class server {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+    
+    public synchronized void broadcastTask(Task task) {
+        for (Iterator<ClientHandler> iterator = clients.iterator(); iterator.hasNext();) {
+            ClientHandler client = iterator.next();
+            if (!client.isAlive()) {
+                iterator.remove();
+                continue;
+            }
+            client.sendTask(task);
         }
     }
 
